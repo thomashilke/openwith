@@ -103,24 +103,29 @@ string."
         (setq oa (car assocs)
               assocs (cdr assocs))
         (when (save-match-data (string-match (car oa) file))
-          (let ((params (mapcar (lambda (x) (if (eq x 'file) file x))
-                                (nth 2 oa))))
-            (when (or (not openwith-confirm-invocation)
-                      (y-or-n-p (format "%s %s? " (cadr oa)
-                                        (mapconcat #'identity params " "))))
-	      ;; garberw myprocess
-	      (let ((myprocess (if (eq system-type 'windows-nt)
-				   (openwith-open-windows file)
-				 (openwith-open-unix (cadr oa) params))))
-		;; garberw added next two lines
-		(set-process-query-on-exit-flag myprocess nil)
-		myprocess)
-              (kill-buffer nil)
-              (when (featurep 'recentf)
-                (recentf-add-file file))
-              ;; inhibit further actions
-              (error "Opened %s in external program"
-                     (file-name-nondirectory file))))))))
+          (if (functionp (cadr oa))
+              (progn
+                (funcall-interactively (cadr oa) file)
+                (when (featurep 'recentf)
+                  (recentf-add-file file))
+                ;; inhibit further actions
+                (error "Opened %s in external program"
+                       (file-name-nondirectory file)))
+            (progn
+              (let ((params (mapcar (lambda (x) (if (eq x 'file) file x))
+                                    (nth 2 oa))))
+                (when (or (not openwith-confirm-invocation)
+                          (y-or-n-p (format "%s %s? " (cadr oa)
+                                            (mapconcat #'identity params " "))))
+	              (if (eq system-type 'windows-nt)
+		              (openwith-open-windows file)
+		            (openwith-open-unix (cadr oa) params))
+                  (kill-buffer nil)
+                  (when (featurep 'recentf)
+                    (recentf-add-file file))
+                  ;; inhibit further actions
+                  (error "Opened %s in external program"
+                         (file-name-nondirectory file))))))))))
   ;; when no association was found, relay the operation to other handlers
   (let ((inhibit-file-name-handlers
          (cons 'openwith-file-handler
