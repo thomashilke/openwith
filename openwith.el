@@ -25,7 +25,7 @@
 ;;; Commentary:
 
 ;; This lets you associate external applications with files so that
-;; you can open them via C-x C-f, with RET in dired, etc.
+;; you can open them via C-x C-f, with RET in Dired, etc.
 
 ;; Copy openwith.el to your load-path and add to your .emacs:
 
@@ -51,9 +51,9 @@
     )
   "Associations of file patterns to external programs.
 File pattern is a regular expression describing the files to
-associate with a program. The program arguments are a list of
+associate with a program.  The program arguments are a list of
 strings and symbols and are passed to the program on invocation,
-where the symbol 'file' is replaced by the file to be opened."
+where the symbol `file' is replaced by the file to be opened."
   :group 'openwith
   :type '(repeat (list (regexp :tag "Files")
                        (string :tag "Program")
@@ -65,30 +65,30 @@ where the symbol 'file' is replaced by the file to be opened."
   :type 'boolean)
 
 (defun openwith-make-extension-regexp (strings)
-  "Make a regexp that matches a string that starts with a '.',
+  "Make a regexp that matches a string that starts with a `.',
 has any of the supplied STRINGS, and is at the end of the
 string."
   (concat "\\." (regexp-opt strings) "$"))
 
 (defun openwith-open-unix (command arglist)
   "Run external command COMMAND, in such a way that it is
-  disowned from the parent Emacs process.  If Emacs dies, the
-  process spawned here lives on.  ARGLIST is a list of strings,
-  each an argument to COMMAND."
+disowned from the parent Emacs process.  If Emacs dies, the
+process spawned here lives on.  ARGLIST is a list of strings,
+each an argument to COMMAND."
   (let ((shell-file-name "/bin/sh"))
     (start-process-shell-command
      "openwith-process" nil
      (concat
-      "exec nohup " command " " 
+      "exec nohup " command " "
       (mapconcat 'shell-quote-argument arglist " ")
       " >/dev/null"))
      ))
 
 (defun openwith-open-windows (file)
   "Run external command COMMAND, in such a way that it is
-  disowned from the parent Emacs process.  If Emacs dies, the
-  process spawned here lives on.  ARGLIST is a list of strings,
-  each an argument to COMMAND."
+disowned from the parent Emacs process.  If Emacs dies, the
+process spawned here lives on.  ARGLIST is a list of strings,
+each an argument to COMMAND."
   (w32-shell-execute "open" file))
 
 (defun openwith-file-handler (operation &rest args)
